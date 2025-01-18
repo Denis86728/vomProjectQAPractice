@@ -1,0 +1,35 @@
+{
+  "name": "vomprojectqapractice",
+  "version": "1.0.0",
+  "description": "Cypress practice exercises",
+  "homepage": "https://github.com/Denis86728/vomProjectQAPractice#readme",
+  "bugs": {
+    "url": "https://github.com/Denis86728/vomProjectQAPractice/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Denis86728/vomProjectQAPractice.git"
+  },
+  "license": "ISC",
+  "author": "DenisPrivistirescu",
+  "type": "commonjs",
+  "main": "cypress.config.js",
+  "scripts": {
+    "cy:open": "cypress open",
+    "test": "npm run cy:run:chrome",
+    "cy:run:chrome": "cypress run --browser chrome",
+    "combine-reports": "mochawesome-merge cypress/reports/mocha/*.json > cypress/reports/mochareports/report.json",
+    "generate-report": "marge cypress/reports/mochareports/report.json -f report -o cypress/reports/mochareports --inline",
+    "clean:reports": "rm -R -f cypress/reports && mkdir cypress/reports && mkdir cypress/reports/mochareports",
+    "clean:videos": "rm -R -f cypress/videos && mkdir cypress/videos",
+    "clean:screenshots": "rm -R -f cypress/screenshots && mkdir cypress/screenshots",
+    "pretest": "npm run clean:reports && npm run clean:videos && npm run clean:screenshots",
+    "posttest": "npm run combine-reports && npm run generate-report"
+  },
+  "devDependencies": {
+    "cypress-multi-reporters": "^2.0.4",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0"
+  }
+}
