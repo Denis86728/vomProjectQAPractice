@@ -16,6 +16,8 @@ module.exports = defineConfig({
       urls: {
         task1: "https://www.way2automation.com/angularjs-protractor/webtables/",
         task2: "https://www.way2automation.com/angularjs-protractor/banking/#/login",
+        task3: "https://jsonplaceholder.typicode.com",
+        task4: "https://albums-collection-service.herokuapp.com"
       }
     },
     setupNodeEvents(on, config) {

@@ -1,48 +1,29 @@
+import ApiUsers from "../api/task 3/apiUsers";
+import ApiPosts from "../api/task 3/apiPosts";
+import ApiAlbums from "../api/task4/apiAlbums";
+const apiUsers = new ApiUsers();
+const apiPosts = new ApiPosts();
+const apiAlbums = new ApiAlbums();
+
 describe("Task 3", () => {
-  const thresholdTimeResponse = 100;
-  it("Check if user can perform multiple actions of different end-points", () => {
+  const thresholdTimeResponse = 50;
+  const username = "Karianne";
+  const titlePost = "Test automation";
+  const bodyPost = "Test automation is awesome";
+  it("Check if user can perform multiple actions of different API end-points", () => {
     //Check that a user exists with the username "Karianne"
-    cy.request({
-      method: "GET",
-      url: `https://jsonplaceholder.typicode.com/users?username=Karianne`,
-    }).then((res) => {
-      expect(res.status).to.eq(200);
-      expect(res.statusText).to.eq("OK");
-      expect(res.body[0].username).to.eq("Karianne");
-    });
+    apiUsers.getUserByName(username);
 
     //Add a new post and specify a title, body and user id
-    cy.request({
-      method: "POST",
-      url: `https://jsonplaceholder.typicode.com/posts`,
-      body: {
-        userId: 4,
-        title: "Test automation",
-        body: "Test automation is awesome",
-      },
-    }).then((res) => {
-      expect(res.status).to.eq(201);
-      expect(res.statusText).to.eq("Created");
-    });
+    apiPosts.addPost(4, titlePost, bodyPost);
 
     //Check if the API end-point will fail if the response time passes the given threshold
-    cy.request({
-      method: "GET",
-      url: `https://jsonplaceholder.typicode.com/posts/4/comments`,
-    }).then((res) => {
-      expect(res.status).to.eq(200);
-      expect(res.statusText).to.eq("OK");
-      expect(res.duration).to.be.lessThan(
-        thresholdTimeResponse,
-        `The response time exceeded the threshold of ${thresholdTimeResponse}`
-      );
-    });
+    apiPosts.checkApiThresholdForPostComments(thresholdTimeResponse);
   });
 });
 describe("Task 4", () => {
   it("Check that a new album can be created", () => {
-    let numberOfAlbums;
-    let albumId;
+    let numberOfAlbumsBefore;
     const newAlbum = {
       title: "Test automation",
       artist: "Cypress",
@@ -52,68 +33,27 @@ describe("Task 4", () => {
       year: 2018,
     };
     //Get the total number of albums
-    cy.request({
-      method: "GET",
-      url: `https://albums-collection-service.herokuapp.com/albums`,
-    }).then((res) => {
-      numberOfAlbums = res.body.length;
-      expect(res.status).to.eq(200);
-      expect(res.statusText).to.eq("OK");
-      expect(numberOfAlbums).to.be.greaterThan(0);
+    apiAlbums.getTotalNumberOfAlbums().then((totalNumberAlbums) => {
+      numberOfAlbumsBefore = totalNumberAlbums;
+      cy.log(`Total number of albums is ${numberOfAlbumsBefore}.`);
     });
 
     //Create a new album
-    cy.request({
-      method: "POST",
-      url: `https://albums-collection-service.herokuapp.com/albums`,
-      body: newAlbum,
-    }).then((res) => {
-      expect(res.status).to.eq(201);
-      expect(res.statusText).to.eq("Created");
-      albumId = res.body.album_id;
-
+    apiAlbums.createAlbum(newAlbum).then((albumId) => {
       //Validate if the album was created
-      cy.request({
-        method: "GET",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-
-        const resAlbum = {
-          title: res.body.title,
-          artist: res.body.artist,
-          genre: res.body.genre,
-          label: res.body.label,
-          songs: res.body.songs,
-          year: res.body.year,
-        };
-        expect(resAlbum).to.deep.eq(newAlbum);
+      apiAlbums.getAlbumDetailsById(albumId).then((resAlbulmDetails) => {
+        expect(resAlbulmDetails).to.deep.eq(newAlbum);
       });
-
       //Delete the created album
-      cy.request({
-        method: "DELETE",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-        expect(res.body.deletedCount).to.eq(1);
-      });
+      apiAlbums.deleteAnAlbumById(albumId);
     });
     //Validate if the total number of albums operation decreased after album was deleted
-    cy.request({
-      method: "GET",
-      url: `https://albums-collection-service.herokuapp.com/albums`,
-    }).then((res) => {
-      const actualNumberOfAlbums = res.body.length;
-      expect(res.status).to.eq(200);
-      expect(res.statusText).to.eq("OK");
-      expect(numberOfAlbums).to.eq(actualNumberOfAlbums);
+    apiAlbums.getTotalNumberOfAlbums().then((currentNumberOfAlbums) => {
+      expect(numberOfAlbumsBefore).to.eq(currentNumberOfAlbums);
+      cy.log(`Total number of albums is still ${currentNumberOfAlbums}.`)
     });
   });
   it("Check that an album can be updated", () => {
-    let albumId;
     let albumBeforeUpdate;
     const newAlbum = {
       title: "Automation test",
@@ -129,15 +69,7 @@ describe("Task 4", () => {
       year: 2024,
     };
     //Create a new album with full information
-    cy.request({
-      method: "POST",
-      url: `https://albums-collection-service.herokuapp.com/albums`,
-      body: newAlbum,
-    }).then((res) => {
-      expect(res.status).to.eq(201);
-      expect(res.statusText).to.eq("Created");
-      albumId = res.body.album_id;
-
+    apiAlbums.createAlbum(newAlbum).then((albumId) => {
       //Validate if the album was created
       cy.request({
         method: "GET",
@@ -216,15 +148,15 @@ describe("Task 4", () => {
         expect(res.body.label).to.eq(albumBeforeUpdate.label);
         expect(res.body.songs).to.eq(albumBeforeUpdate.songs);
       });
-      //Delete the created album 
+      //Delete the created album
       cy.request({
         method: "DELETE",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`
+        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
       }).then((res) => {
         expect(res.status).to.eq(200);
         expect(res.statusText).to.eq("OK");
         expect(res.body.deletedCount).to.eq(1);
-      })
+      });
       //Validate if the album was deleted
       cy.request({
         method: "GET",
@@ -233,8 +165,10 @@ describe("Task 4", () => {
       }).then((res) => {
         expect(res.status).to.eq(404);
         expect(res.statusText).to.eq("Not Found");
-        expect(res.body).to.eq("The album with the given album_id was not found.")
-      })
+        expect(res.body).to.eq(
+          "The album with the given album_id was not found."
+        );
+      });
     });
   });
 });
