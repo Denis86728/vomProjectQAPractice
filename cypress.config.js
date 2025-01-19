@@ -9,17 +9,6 @@ module.exports = defineConfig({
   requestTimeout: 15000,
   responseTimeout: 15000,
   hideXHRInCommandLog: true,
-  "reporter": "cypress-multi-reporters",
-    "reporterOptions": {
-        "reporterEnabled": "mochawesome",
-        "mochawesomeReporterOptions": {
-            "reportDir": "cypress/reports/mocha",
-            "quite": true,
-            "overwrite": false,
-            "html": true,
-            "json": true
-        }
-    },
   e2e: {
     viewportHeight: 1080,
     viewportWidth: 1920,
