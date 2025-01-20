@@ -7,18 +7,18 @@ This repository contains automated tests for VOM project. The tests are develope
 # Installation
 1. Clone the repository locally
 2. Ensure that Node.js is installed on your local machine
-4. To install all the dependencies run the following command: 
+3. To install all the dependencies run the following command: 
    ```bash
    npm install
-5. All the scripts can be observed in:
+4. All the scripts can be observed in:
    ```bash
    package.json file 
-6. For running all the tests in headless mode run the following command:
+5. To run all the tests in headless mode run the following command:
    ```bash
    npm run test 
-6. To open the cypress console run the following command:
+6. To run tests in headed mode open cypress console and select e2e testing -> start e2e in chrome -> select desired test. To open the cypress console run the following command:
     ```bash
-    npm run cy:open -> select e2e testing -> start e2e in chrome -> select desired test
+    npm run cy:open
    
 # Tests 
 | Type       | Location      |
