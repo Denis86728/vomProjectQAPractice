@@ -1,4 +1,4 @@
-export default class Task1Page {
+export default class WebTablesPage {
   //Table locators
   getEditButtonForACustomerByIndex(indexCustomer) {
     return cy.get(
