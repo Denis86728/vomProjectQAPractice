@@ -2,13 +2,29 @@
 
 # Overview 
 
-This repository contains automated tests for VOM project. The tests are developed using Cypress tool and written in Java Script language. To ensure a scalable, maintainable and efficient structure, the framework is designed following Test-Driven Development(TDD) practices and the Page Object Model(POM) design pattern. 
+This repository contains automated tests for VOM project. The tests are developed using Cypress tool and written in Java Script language. To ensure a scalable, maintainable, and efficient structure, the framework follows Test-Driven Development(TDD) practices and the Page Object Model(POM) design pattern. 
 
 # Installation
-1. Clone the repository locally 
-2. Execute "npm install" in order to install all the dependencies. Make sure you have installed on your local machine node.js
-3. All the scripts can be observed in package.json file 
-    # 3.1 For running all the tests in headless mode run the following command: npm run test 
-    # 3.2 For opening cypress console run the following command: npm run cy:open
+1. Clone the repository locally
+2. Ensure that Node.js is installed on your local machine
+4. To install all the dependencies run the following command: 
+   ```bash
+   npm install
+5. All the scripts can be observed in:
+   ```bash
+   package.json file 
+6. For running all the tests in headless mode run the following command:
+   ```bash
+   npm run test 
+6. To open the cypress console run the following command:
+    ```bash
+    npm run cy:open
+   
+# Tests 
+| Type       | Location      |
+|----------------|----------------|
+| Api  | cypress/tests/beTests.js  | 
+| UI  | cypress/tests/feTests.js  | 
+
 
 
