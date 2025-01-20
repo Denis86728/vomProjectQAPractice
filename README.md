@@ -18,7 +18,7 @@ This repository contains automated tests for VOM project. The tests are develope
    npm run test 
 6. To open the cypress console run the following command:
     ```bash
-    npm run cy:open
+    npm run cy:open -> select e2e testing -> start e2e in chrome -> select desired test
    
 # Tests 
 | Type       | Location      |
