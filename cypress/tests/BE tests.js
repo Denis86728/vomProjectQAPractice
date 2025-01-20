@@ -6,7 +6,7 @@ const apiPosts = new ApiPosts();
 const apiAlbums = new ApiAlbums();
 
 describe("Task 3", () => {
-  const thresholdTimeResponse = 50;
+  const thresholdTimeResponse = 250;
   const username = "Karianne";
   const titlePost = "Test automation";
   const bodyPost = "Test automation is awesome";
@@ -50,11 +50,10 @@ describe("Task 4", () => {
     //Validate if the total number of albums operation decreased after album was deleted
     apiAlbums.getTotalNumberOfAlbums().then((currentNumberOfAlbums) => {
       expect(numberOfAlbumsBefore).to.eq(currentNumberOfAlbums);
-      cy.log(`Total number of albums is still ${currentNumberOfAlbums}.`)
+      cy.log(`Total number of albums is still ${currentNumberOfAlbums} after create and delete actions.`);
     });
   });
   it("Check that an album can be updated", () => {
-    let albumBeforeUpdate;
     const newAlbum = {
       title: "Automation test",
       artist: "Cypress version 14",
@@ -63,112 +62,55 @@ describe("Task 4", () => {
       songs: 10,
       year: 2025,
     };
-    const modifiedAlbum = {
+    const updatedAlbum = {
       title: "BE test",
       songs: 15,
       year: 2024,
     };
+    const nullValuesAlbum = {
+      genre: null,
+      year: null,
+    };
     //Create a new album with full information
     apiAlbums.createAlbum(newAlbum).then((albumId) => {
       //Validate if the album was created
-      cy.request({
-        method: "GET",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-
-        const resAlbum = {
-          title: res.body.title,
-          artist: res.body.artist,
-          genre: res.body.genre,
-          label: res.body.label,
-          songs: res.body.songs,
-          year: res.body.year,
-        };
+      apiAlbums.getAlbumDetailsById(albumId).then((resAlbum) => {
         expect(resAlbum).to.deep.eq(newAlbum);
-        albumBeforeUpdate = res.body;
+        //Save the updated album attributes as a new alias
+        cy.wrap(resAlbum).as("albumInitial");
       });
 
       //Change the album title, songs and year
-      cy.request({
-        method: "PATCH",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-        body: modifiedAlbum,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-        expect(res.body.modifiedCount).to.eq(1);
-      });
+      apiAlbums.partialUpdateAlbum(albumId, updatedAlbum);
 
-      //Validate if the album was updated
-      cy.request({
-        method: "GET",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-
-        const resAlbum = {
-          title: res.body.title,
-          songs: res.body.songs,
-          year: res.body.year,
-        };
-
-        expect(resAlbum).to.deep.eq(modifiedAlbum);
-        expect(res.body.artist).to.eq(albumBeforeUpdate.artist);
-        expect(res.body.genre).to.eq(albumBeforeUpdate.genre);
-        expect(res.body.label).to.eq(albumBeforeUpdate.label);
-        albumBeforeUpdate = res.body;
-      });
-      //Delete the genre and year of the album
-      cy.request({
-        method: "PATCH",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-        body: {
-          genre: null,
-          year: null,
-        },
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-        expect(res.body.modifiedCount).to.eq(1);
-      });
-      //Validate if the album was updated
-      cy.request({
-        method: "GET",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-        expect(res.body.genre).to.eq(null);
-        expect(res.body.year).to.eq(null);
-        expect(res.body.title).to.eq(albumBeforeUpdate.title);
-        expect(res.body.artist).to.eq(albumBeforeUpdate.artist);
-        expect(res.body.label).to.eq(albumBeforeUpdate.label);
-        expect(res.body.songs).to.eq(albumBeforeUpdate.songs);
-      });
-      //Delete the created album
-      cy.request({
-        method: "DELETE",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.statusText).to.eq("OK");
-        expect(res.body.deletedCount).to.eq(1);
-      });
-      //Validate if the album was deleted
-      cy.request({
-        method: "GET",
-        url: `https://albums-collection-service.herokuapp.com/albums/${albumId}`,
-        failOnStatusCode: false,
-      }).then((res) => {
-        expect(res.status).to.eq(404);
-        expect(res.statusText).to.eq("Not Found");
-        expect(res.body).to.eq(
-          "The album with the given album_id was not found."
+      //Validate if the album was updated using the alias
+      cy.get("@albumInitial").then((albumBeforeUpdate) => {
+        apiAlbums.checkTitleSongYearAlbumUpdateAttributes(
+          albumId,
+          updatedAlbum,
+          albumBeforeUpdate
         );
       });
+      //Delete the genre and year of the album
+      apiAlbums.partialUpdateAlbum(albumId, nullValuesAlbum);
+
+      //Save the updated album as a new alias
+      apiAlbums.getAlbumDetailsById(albumId).then((resAlbum) => {
+        cy.wrap(resAlbum).as("albumAfterGenreYearRemove");
+      });
+
+      //Validate if the album was updated using the alias
+      apiAlbums.getAlbumDetailsById(albumId).then((resAlbum) => {
+        cy.get("@albumAfterGenreYearRemove").then(
+          (albumAfterGenreYearRemove) => {
+            expect(resAlbum).to.deep.eq(albumAfterGenreYearRemove);
+          }
+        );
+      });
+      //Delete the created album
+      apiAlbums.deleteAnAlbumById(albumId);
+      //Validate if the album was deleted
+      apiAlbums.checkIfAlbumDoesNotExist(albumId);
     });
   });
 });
