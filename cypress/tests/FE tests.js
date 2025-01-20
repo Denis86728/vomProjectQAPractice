@@ -32,8 +32,8 @@ describe("Frontend", () => {
     task1Elements.getSaveButtonEditModal().click();
 
     //Check if the value was saved and is displayed correctly in the table
-    //Bug here. This test will fail
-    //task1Elements.getCustomerLabelForACustomerByIndex(6).should("eq", "Company AAA");
+    //BUG here. This assert will fail. Ticket was raised.
+    // task1Elements.getCustomerLabelForACustomerByIndex(6).should("eq", "Company AAA");
   });
   it("Task 2 - Check if user can create and delete a customer as a Bank Manager", () => {
     //Navigate to Task 2 website
